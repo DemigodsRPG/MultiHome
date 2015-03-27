@@ -47,7 +47,6 @@ MultiHome:
     enableEconomy: false
     dataStoreMethod: file
     messages:
-        tooManyParameters: 'Too many parameters.'
         defaultHomeSetMessage: 'Deafult home set.'
         cannotDeleteDefaultHomeMessage: 'You cannot delete your default home location.'
         homeSetMessage: 'Home {HOME} set.'

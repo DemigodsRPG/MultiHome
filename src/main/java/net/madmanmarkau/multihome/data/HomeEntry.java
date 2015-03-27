@@ -5,17 +5,16 @@ import org.bukkit.Server;
 import org.bukkit.World;
 
 public class HomeEntry {
-    private String ownerName = "";
+    private final String ownerId;
+    private String ownerName;
     private String homeName = "";
     private String world = "";
     private double X = 0, Y = 0, Z = 0;
     private float yaw = 0, pitch = 0;
 
-    public HomeEntry() {
-    }
-
-    public HomeEntry(String ownerName, String homeName, String world, double X, double Y, double Z, float pitch, float yaw) {
-        this.setOwnerName(ownerName);
+    public HomeEntry(String ownerId, String ownerName, String homeName, String world, double X, double Y, double Z, float pitch, float yaw) {
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
         this.setHomeName(homeName);
         this.setWorld(world);
         this.setX(X);
@@ -25,8 +24,9 @@ public class HomeEntry {
         this.setYaw(yaw);
     }
 
-    public HomeEntry(String ownerName, String homeName, Location location) {
-        this.setOwnerName(ownerName);
+    public HomeEntry(String ownerId, String ownerName, String homeName, Location location) {
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
         this.setHomeName(homeName);
         this.setWorld(location.getWorld().getName());
         this.setX(location.getX());
@@ -43,6 +43,10 @@ public class HomeEntry {
         this.setZ(Z);
         this.setPitch(pitch);
         this.setYaw(yaw);
+    }
+
+    public String getOwnerId() {
+        return ownerId;
     }
 
     public String getOwnerName() {
@@ -70,7 +74,7 @@ public class HomeEntry {
             if (world != null) {
                 return new Location(server.getWorld(this.world), this.X, this.Y, this.Z, this.yaw, this.pitch);
             }
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
 
         return null;

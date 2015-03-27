@@ -1,8 +1,8 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.Messaging;
-import net.madmanmarkau.multihome.MultiHome;
-import net.madmanmarkau.multihome.Util;
+import net.madmanmarkau.multihome.MultiHomePlugin;
+import net.madmanmarkau.multihome.util.MessageUtil;
+import net.madmanmarkau.multihome.util.MiscUtil;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,12 +12,12 @@ import java.util.Map.Entry;
 
 public class CoolDownManagerFile extends CoolDownManager {
     private final File cooldownsFile;
-    private HashMap<String, CoolDownEntry> cooldownEntries = new HashMap<String, CoolDownEntry>();
+    private HashMap<String, CoolDownEntry> cooldownEntries = new HashMap<>();
 
     /**
      * @param plugin The plug-in.
      */
-    public CoolDownManagerFile(MultiHome plugin) {
+    public CoolDownManagerFile(MultiHomePlugin plugin) {
         super(plugin);
         this.cooldownsFile = new File(plugin.getDataFolder(), "cooldowns.txt");
 
@@ -89,16 +89,16 @@ public class CoolDownManagerFile extends CoolDownManager {
             FileWriter fstream = new FileWriter(this.cooldownsFile);
             BufferedWriter writer = new BufferedWriter(fstream);
 
-            writer.write("# Stores user cooldown times." + Util.newLine());
-            writer.write("# <username>;<expiry>" + Util.newLine());
-            writer.write(Util.newLine());
+            writer.write("# Stores user cooldown times." + MiscUtil.newLine());
+            writer.write("# <username>;<expiry>" + MiscUtil.newLine());
+            writer.write(MiscUtil.newLine());
 
             for (Entry<String, CoolDownEntry> entry : this.cooldownEntries.entrySet()) {
-                writer.write(entry.getValue().getPlayer() + ";" + Long.toString(entry.getValue().getExpiry().getTime()) + Util.newLine());
+                writer.write(entry.getValue().getPlayer() + ";" + Long.toString(entry.getValue().getExpiry().getTime()) + MiscUtil.newLine());
             }
             writer.close();
         } catch (Exception e) {
-            Messaging.logSevere("Could not write the cooldowns file.", this.plugin);
+            MessageUtil.logSevere("Could not write the cooldowns file.");
         }
     }
 
@@ -131,7 +131,7 @@ public class CoolDownManagerFile extends CoolDownManager {
                                     }
                                 }
                             }
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
 
@@ -141,7 +141,7 @@ public class CoolDownManagerFile extends CoolDownManager {
                 reader.close();
             }
         } catch (Exception e) {
-            Messaging.logSevere("Could not read the cooldowns file.", this.plugin);
+            MessageUtil.logSevere("Could not read the cooldowns file.");
         }
     }
 }

@@ -10,20 +10,15 @@ import org.bukkit.event.entity.EntityDamageEvent;
  * @author Sleaker
  */
 public class MultiHomeEntityListener implements Listener {
-    MultiHome plugin;
+    MultiHomePlugin plugin;
 
-    MultiHomeEntityListener(MultiHome plugin) {
+    MultiHomeEntityListener(MultiHomePlugin plugin) {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.isCancelled())
-            return;
-
-        if (!(event.getEntity() instanceof Player))
-            return;
-        else {
+        if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             if (plugin.getWarmUpManager().getWarmup(player.getName().toLowerCase()) != null && Settings.getSettingDisrupt(player)) {
                 plugin.getWarmUpManager().removeWarmup(player.getName().toLowerCase());

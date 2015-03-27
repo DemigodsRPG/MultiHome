@@ -1,14 +1,14 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.MultiHome;
+import net.madmanmarkau.multihome.MultiHomePlugin;
 
 /**
  * @author MadManMarkAu
  */
 public abstract class WarmUpManager {
-    MultiHome plugin;
+    MultiHomePlugin plugin;
 
-    public WarmUpManager(MultiHome plugin) {
+    public WarmUpManager(MultiHomePlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -28,7 +28,7 @@ public abstract class WarmUpManager {
     /**
      * Adds a new warmup or updates an existing one.
      *
-     * @param expiry Date object for when this warmup expires.
+     * @param warmup Date object for when this warmup expires.
      */
     public abstract void addWarmup(WarmUpEntry warmup);
 
@@ -39,5 +39,5 @@ public abstract class WarmUpManager {
      */
     public abstract void removeWarmup(String player);
 
-    abstract void taskComplete(WarmUpEntry warmup);
+    abstract public void taskComplete(WarmUpEntry warmup);
 }

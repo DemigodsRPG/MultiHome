@@ -1,8 +1,8 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.Messaging;
-import net.madmanmarkau.multihome.MultiHome;
-import net.madmanmarkau.multihome.Util;
+import net.madmanmarkau.multihome.MultiHomePlugin;
+import net.madmanmarkau.multihome.util.MessageUtil;
+import net.madmanmarkau.multihome.util.MiscUtil;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class InviteManagerFile extends InviteManager {
     private File invitesFile;
     private HashMap<String, ArrayList<InviteEntry>> inviteEntries = new HashMap<String, ArrayList<InviteEntry>>();
 
-    public InviteManagerFile(MultiHome plugin) {
+    public InviteManagerFile(MultiHomePlugin plugin) {
         super(plugin);
         this.invitesFile = new File(plugin.getDataFolder(), "invites.txt");
 
@@ -229,9 +229,9 @@ public class InviteManagerFile extends InviteManager {
             FileWriter fstream = new FileWriter(this.invitesFile);
             BufferedWriter writer = new BufferedWriter(fstream);
 
-            writer.write("# Stores user home invites." + Util.newLine());
-            writer.write("# <owner>;<home>;<target>;[<expiry>];[<reason>]" + Util.newLine());
-            writer.write(Util.newLine());
+            writer.write("# Stores user home invites." + MiscUtil.newLine());
+            writer.write("# <owner>;<home>;<target>;[<expiry>];[<reason>]" + MiscUtil.newLine());
+            writer.write(MiscUtil.newLine());
 
             String owner;
             String home;
@@ -251,12 +251,12 @@ public class InviteManagerFile extends InviteManager {
                     if (thisInvite.getInviteReason() != null && thisInvite.getInviteReason().length() > 0)
                         reason = thisInvite.getInviteReason();
 
-                    writer.write(owner + ";" + home + ";" + target + ";" + expiry + ";" + reason + Util.newLine());
+                    writer.write(owner + ";" + home + ";" + target + ";" + expiry + ";" + reason + MiscUtil.newLine());
                 }
             }
             writer.close();
         } catch (Exception e) {
-            Messaging.logSevere("Could not write the invites file.", this.plugin);
+            MessageUtil.logSevere("Could not write the invites file.");
         }
     }
 
@@ -272,12 +272,12 @@ public class InviteManagerFile extends InviteManager {
                 FileWriter fstream = new FileWriter(this.invitesFile);
                 BufferedWriter out = new BufferedWriter(fstream);
 
-                out.write("# Stores user home invites." + Util.newLine());
-                out.write("# <owner>;<home>;<target>;[<expiry>];[<reason>]" + Util.newLine());
-                out.write(Util.newLine());
+                out.write("# Stores user home invites." + MiscUtil.newLine());
+                out.write("# <owner>;<home>;<target>;[<expiry>];[<reason>]" + MiscUtil.newLine());
+                out.write(MiscUtil.newLine());
                 out.close();
             } catch (Exception e) {
-                Messaging.logSevere("Could not write the deafult invites file.", this.plugin);
+                MessageUtil.logSevere("Could not write the deafult invites file.");
                 return;
             }
         } else {
@@ -327,7 +327,7 @@ public class InviteManagerFile extends InviteManager {
 
                 reader.close();
             } catch (Exception e) {
-                Messaging.logSevere("Could not read the invite list.", this.plugin);
+                MessageUtil.logSevere("Could not read the invite list.");
             }
         }
     }
@@ -359,15 +359,13 @@ public class InviteManagerFile extends InviteManager {
                 home = values[1].toLowerCase();
                 target = values[2].toLowerCase();
                 expiry = new Date(Long.parseLong(values[3]));
-                reason = Util.joinString(values, 4, ";");
+                reason = MiscUtil.joinString(values, 4, ";");
 
                 return new InviteEntry(owner, home, target, expiry, reason);
             }
         } catch (Exception e) {
             // This entry failed. Ignore and continue.
-            if (line != null) {
-                Messaging.logWarning("Failed to load invite list! Line: " + line, this.plugin);
-            }
+            MessageUtil.logWarning("Failed to load invite list! Line: " + line);
         }
 
         return null;

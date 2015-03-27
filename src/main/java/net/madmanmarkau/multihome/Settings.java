@@ -1,12 +1,14 @@
 package net.madmanmarkau.multihome;
 
+import net.madmanmarkau.multihome.util.MessageUtil;
+import net.madmanmarkau.multihome.util.PermissionUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class Settings {
-    private static MultiHome plugin;
+    private static MultiHomePlugin plugin;
 
-    public static void initialize(MultiHome plugin) {
+    public static void initialize(MultiHomePlugin plugin) {
         Settings.plugin = plugin;
     }
 
@@ -17,7 +19,7 @@ public class Settings {
 
     public static int getSettingInt(Player player, String setting, int defaultValue) {
         // Get the player group
-        String playerGroup = HomePermissions.getGroup(player);
+        String playerGroup = PermissionUtil.getGroup(player);
 
         if (playerGroup != null) {
             // Player group found
@@ -33,7 +35,7 @@ public class Settings {
 
     public static String getSettingString(Player player, String setting, String defaultValue) {
         // Get the player group
-        String playerGroup = HomePermissions.getGroup(player);
+        String playerGroup = PermissionUtil.getGroup(player);
 
         if (playerGroup != null) {
             // Player group found
@@ -51,11 +53,6 @@ public class Settings {
     public static String getDataStoreSettingString(String storeMethod, String setting) {
         return plugin.getConfig().getString("MultiHome.dataStoreSettings." + storeMethod + "." + setting, "");
     }
-
-    public static String getDataStoreMethod() {
-        return plugin.getConfig().getString("MultiHome.dataStoreMethod", "file");
-    }
-
 
     public static boolean isHomeOnDeathEnabled() {
         return plugin.getConfig().getBoolean("MultiHome.enableHomeOnDeath", false);
@@ -98,32 +95,26 @@ public class Settings {
     }
 
     public static boolean getSettingDisrupt(Player player) {
-        return getSettingInt(player, "disruptWarmup", 1) == 1 ? true : false;
-    }
-
-    public static void sendMessageTooManyParameters(CommandSender sender) {
-        String message = plugin.getConfig().getString("MultiHome.messages.tooManyParameters", null);
-
-        if (message != null) Messaging.sendSuccess(sender, message);
+        return getSettingInt(player, "disruptWarmup", 1) == 1;
     }
 
     public static void sendMessageDefaultHomeSet(CommandSender sender) {
         String message = plugin.getConfig().getString("MultiHome.messages.defaultHomeSetMessage", null);
 
-        if (message != null) Messaging.sendSuccess(sender, message);
+        if (message != null) MessageUtil.sendSuccess(sender, message);
     }
 
     public static void sendMessageCannotDeleteDefaultHome(CommandSender sender) {
         String message = plugin.getConfig().getString("MultiHome.messages.cannotDeleteDefaultHomeMessage", null);
 
-        if (message != null) Messaging.sendError(sender, message);
+        if (message != null) MessageUtil.sendError(sender, message);
     }
 
     public static void sendMessageHomeSet(CommandSender sender, String home) {
         String message = plugin.getConfig().getString("MultiHome.messages.homeSetMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{HOME\\}", home));
         }
     }
@@ -132,7 +123,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeDeletedMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{NAME\\}", home)
                     .replaceAll("\\{HOME\\}", home));
         }
@@ -142,7 +133,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.warmupMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{SECONDS\\}", Integer.toString(timeLeft)));
         }
     }
@@ -150,20 +141,20 @@ public class Settings {
     public static void sendMessageWarmupComplete(CommandSender sender) {
         String message = plugin.getConfig().getString("MultiHome.messages.warmupCompleteMessage", null);
 
-        if (message != null) Messaging.sendSuccess(sender, message);
+        if (message != null) MessageUtil.sendSuccess(sender, message);
     }
 
     public static void sendMessageWarmupDisrupted(CommandSender sender) {
         String message = plugin.getConfig().getString("MultiHome.messages.warmupDisruptedMessage", null);
 
-        if (message != null) Messaging.sendError(sender, message);
+        if (message != null) MessageUtil.sendError(sender, message);
     }
 
     public static void sendMessageCooldown(CommandSender sender, int timeLeft) {
         String message = plugin.getConfig().getString("MultiHome.messages.cooldownMessage", null);
 
         if (message != null) {
-            Messaging.sendError(sender, message
+            MessageUtil.sendError(sender, message
                     .replaceAll("\\{SECONDS\\}", Integer.toString(timeLeft)));
         }
     }
@@ -172,7 +163,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.tooManyHomesMessage", null);
 
         if (message != null) {
-            Messaging.sendError(sender, message
+            MessageUtil.sendError(sender, message
                     .replaceAll("\\{CURRENT\\}", Integer.toString(currentHomes))
                     .replaceAll("\\{MAX\\}", Integer.toString(maxHomes)));
         }
@@ -182,7 +173,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.noHomeMessage", null);
 
         if (message != null) {
-            Messaging.sendError(sender, message
+            MessageUtil.sendError(sender, message
                     .replaceAll("\\{HOME\\}", home));
         }
     }
@@ -190,14 +181,14 @@ public class Settings {
     public static void sendMessageNoDefaultHome(CommandSender sender) {
         String message = plugin.getConfig().getString("MultiHome.messages.noDefaultHomeMessage", null);
 
-        if (message != null) Messaging.sendError(sender, message);
+        if (message != null) MessageUtil.sendError(sender, message);
     }
 
     public static void sendMessageNoPlayer(CommandSender sender, String targetPlayer) {
         String message = plugin.getConfig().getString("MultiHome.messages.noPlayerMessage", null);
 
         if (message != null) {
-            Messaging.sendError(sender, message
+            MessageUtil.sendError(sender, message
                     .replaceAll("\\{PLAYER\\}", targetPlayer));
         }
     }
@@ -206,7 +197,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeListMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{LIST\\}", homeList));
         }
     }
@@ -215,7 +206,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeListOthersMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{PLAYER\\}", player)
                     .replaceAll("\\{LIST\\}", homeList));
         }
@@ -225,7 +216,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeInviteOwnerMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{TARGET\\}", target)
                     .replaceAll("\\{HOME\\}", home));
         }
@@ -235,7 +226,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeInviteTargetMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{OWNER\\}", owner)
                     .replaceAll("\\{HOME\\}", home));
         }
@@ -245,7 +236,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeInviteTimedOwnerMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{TARGET\\}", target)
                     .replaceAll("\\{HOME\\}", home)
                     .replaceAll("\\{TIME\\}", Integer.toString(time)));
@@ -256,7 +247,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeInviteTimedTargetMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{OWNER\\}", owner)
                     .replaceAll("\\{HOME\\}", home)
                     .replaceAll("\\{TIME\\}", Integer.toString(time)));
@@ -267,7 +258,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeUninviteOwnerMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{TARGET\\}", target)
                     .replaceAll("\\{HOME\\}", home));
         }
@@ -277,7 +268,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeUninviteTargetMessage", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{OWNER\\}", owner)
                     .replaceAll("\\{HOME\\}", home));
         }
@@ -287,7 +278,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeListInvitesToMe", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{TARGET\\}", target)
                     .replaceAll("\\{LIST\\}", list));
         }
@@ -297,7 +288,7 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.homeListInvitesToOthers", null);
 
         if (message != null) {
-            Messaging.sendSuccess(sender, message
+            MessageUtil.sendSuccess(sender, message
                     .replaceAll("\\{OWNER\\}", owner)
                     .replaceAll("\\{LIST\\}", list));
         }
@@ -307,21 +298,21 @@ public class Settings {
         String message = plugin.getConfig().getString("MultiHome.messages.econNotEnoughFunds", null);
 
         if (message != null) {
-            Messaging.sendError(player, message.replaceAll("\\{AMOUNT\\}", amount + ""));
+            MessageUtil.sendError(player, message.replaceAll("\\{AMOUNT\\}", amount + ""));
         }
     }
 
     public static void sendMessageDeductForHome(Player player, double amount) {
         String message = plugin.getConfig().getString("MultiHome.messages.econDeductedForHome", null);
         if (message != null) {
-            Messaging.sendSuccess(player, message.replaceAll("\\{AMOUNT\\}", amount + ""));
+            MessageUtil.sendSuccess(player, message.replaceAll("\\{AMOUNT\\}", amount + ""));
         }
     }
 
     public static void sendMessageDeductForSet(Player player, double amount) {
         String message = plugin.getConfig().getString("MultiHome.messages.econDeductedForSet", null);
         if (message != null) {
-            Messaging.sendSuccess(player, message.replaceAll("\\{AMOUNT\\}", amount + ""));
+            MessageUtil.sendSuccess(player, message.replaceAll("\\{AMOUNT\\}", amount + ""));
         }
     }
 }

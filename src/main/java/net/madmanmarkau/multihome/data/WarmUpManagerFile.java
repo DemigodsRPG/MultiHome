@@ -1,8 +1,9 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.Messaging;
-import net.madmanmarkau.multihome.MultiHome;
-import net.madmanmarkau.multihome.Util;
+import net.madmanmarkau.multihome.MultiHomePlugin;
+import net.madmanmarkau.multihome.util.MessageUtil;
+import net.madmanmarkau.multihome.util.MiscUtil;
+import net.madmanmarkau.multihome.util.WarmUpTask;
 
 import java.io.*;
 import java.util.Date;
@@ -13,7 +14,7 @@ public class WarmUpManagerFile extends WarmUpManager {
     private final File warmupsFile;
     private HashMap<String, WarmUpTask> warmupEntries = new HashMap<String, WarmUpTask>();
 
-    public WarmUpManagerFile(MultiHome plugin) {
+    public WarmUpManagerFile(MultiHomePlugin plugin) {
         super(plugin);
         this.warmupsFile = new File(plugin.getDataFolder(), "warmups.txt");
 
@@ -31,7 +32,7 @@ public class WarmUpManagerFile extends WarmUpManager {
 
             saveWarmups();
         } catch (Exception e) {
-            Messaging.logSevere("Failed to clear warmups: " + e.getMessage(), this.plugin);
+            MessageUtil.logSevere("Failed to clear warmups: " + e.getMessage());
         }
     }
 
@@ -42,7 +43,7 @@ public class WarmUpManagerFile extends WarmUpManager {
                 return this.warmupEntries.get(player.toLowerCase()).getWarmup();
             }
         } catch (Exception e) {
-            Messaging.logSevere("Failed to get warmup: " + e.getMessage(), this.plugin);
+            MessageUtil.logSevere("Failed to get warmup: " + e.getMessage());
         }
 
         return null;
@@ -63,7 +64,7 @@ public class WarmUpManagerFile extends WarmUpManager {
 
             saveWarmups();
         } catch (Exception e) {
-            Messaging.logSevere("Failed to add warmup: " + e.getMessage(), this.plugin);
+            MessageUtil.logSevere("Failed to add warmup: " + e.getMessage());
         }
     }
 
@@ -78,7 +79,7 @@ public class WarmUpManagerFile extends WarmUpManager {
                 saveWarmups();
             }
         } catch (Exception e) {
-            Messaging.logSevere("Failed to remove warmup: " + e.getMessage(), this.plugin);
+            MessageUtil.logSevere("Failed to remove warmup: " + e.getMessage());
         }
     }
 
@@ -89,7 +90,7 @@ public class WarmUpManagerFile extends WarmUpManager {
 
             saveWarmups();
         } catch (Exception e) {
-            Messaging.logSevere("Failed to complete warmup: " + e.getMessage(), this.plugin);
+            MessageUtil.logSevere("Failed to complete warmup: " + e.getMessage());
         }
     }
 
@@ -101,20 +102,20 @@ public class WarmUpManagerFile extends WarmUpManager {
             FileWriter fstream = new FileWriter(this.warmupsFile);
             BufferedWriter writer = new BufferedWriter(fstream);
 
-            writer.write("# Stores user warmup times." + Util.newLine());
-            writer.write("# <username>;<expiry>;<X>;<Y>;<Z>;<pitch>;<yaw>;<world>;<cost>" + Util.newLine());
-            writer.write(Util.newLine());
+            writer.write("# Stores user warmup times." + MiscUtil.newLine());
+            writer.write("# <username>;<expiry>;<X>;<Y>;<Z>;<pitch>;<yaw>;<world>;<cost>" + MiscUtil.newLine());
+            writer.write(MiscUtil.newLine());
 
             for (Entry<String, WarmUpTask> entry : this.warmupEntries.entrySet()) {
                 WarmUpEntry home = entry.getValue().getWarmup();
 
                 writer.write(home.getPlayer() + ";" + home.getExpiry().getTime() + ";" +
                         home.getX() + ";" + home.getY() + ";" + home.getZ() + ";" +
-                        home.getPitch() + ";" + home.getYaw() + ";" + home.getWorld() + ";" + home.getCost() + Util.newLine());
+                        home.getPitch() + ";" + home.getYaw() + ";" + home.getWorld() + ";" + home.getCost() + MiscUtil.newLine());
             }
             writer.close();
         } catch (Exception e) {
-            Messaging.logSevere("Could not write the warmups file.", this.plugin);
+            MessageUtil.logSevere("Could not write the warmups file.");
         }
     }
 
@@ -167,7 +168,7 @@ public class WarmUpManagerFile extends WarmUpManager {
                 reader.close();
             }
         } catch (Exception e) {
-            Messaging.logSevere("Could not read the warmups file: " + e.getMessage(), plugin);
+            MessageUtil.logSevere("Could not read the warmups file: " + e.getMessage());
         }
     }
 }

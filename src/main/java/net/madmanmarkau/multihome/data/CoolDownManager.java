@@ -1,17 +1,17 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.MultiHome;
+import net.madmanmarkau.multihome.MultiHomePlugin;
 import org.bukkit.entity.Player;
 
 import java.util.Date;
 
 public abstract class CoolDownManager {
-    protected final MultiHome plugin;
+    protected final MultiHomePlugin plugin;
 
     /**
      * @param plugin The plug-in.
      */
-    public CoolDownManager(MultiHome plugin) {
+    public CoolDownManager(MultiHomePlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -61,8 +61,7 @@ public abstract class CoolDownManager {
     /**
      * Adds a new cooldown or updates an existing one.
      *
-     * @param player Player to set cooldown on.
-     * @param expiry Date object for when this cooldown expires.
+     * @param cooldown Cooldown entry.
      */
     public abstract void addCooldown(CoolDownEntry cooldown);
 

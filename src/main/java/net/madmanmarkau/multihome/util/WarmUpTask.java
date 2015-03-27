@@ -1,9 +1,9 @@
-package net.madmanmarkau.multihome.data;
+package net.madmanmarkau.multihome.util;
 
-import net.madmanmarkau.multihome.MultiHome;
 import net.madmanmarkau.multihome.MultiHomeEconManager;
+import net.madmanmarkau.multihome.MultiHomePlugin;
 import net.madmanmarkau.multihome.Settings;
-import net.madmanmarkau.multihome.Util;
+import net.madmanmarkau.multihome.data.WarmUpEntry;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -14,12 +14,12 @@ import java.util.Date;
  * This class should not be visible outside the Data package.
  */
 
-class WarmUpTask implements Runnable {
-    private final MultiHome plugin;
+public class WarmUpTask implements Runnable {
+    private final MultiHomePlugin plugin;
     private final WarmUpEntry warmup;
     private final int taskId;
 
-    public WarmUpTask(MultiHome plugin, WarmUpEntry warmup) {
+    public WarmUpTask(MultiHomePlugin plugin, WarmUpEntry warmup) {
         this.plugin = plugin;
         this.warmup = warmup;
 
@@ -60,11 +60,11 @@ class WarmUpTask implements Runnable {
 
                 Settings.sendMessageWarmupComplete(player);
 
-                Util.teleportPlayer(player, location, this.plugin);
+                MiscUtil.teleportPlayer(player, location, this.plugin);
 
                 int cooldownTime = Settings.getSettingCooldown(player);
                 if (cooldownTime > 0)
-                    this.plugin.getCoolDownManager().addCooldown(player.getName(), Util.dateInFuture(cooldownTime));
+                    this.plugin.getCoolDownManager().addCooldown(player.getName(), MiscUtil.dateInFuture(cooldownTime));
             }
         }
 

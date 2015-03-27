@@ -1,10 +1,11 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.MultiHome;
+import net.madmanmarkau.multihome.MultiHomePlugin;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Base class for invite database objects.
@@ -12,12 +13,12 @@ import java.util.Date;
  * @author MadManMarkAu
  */
 public abstract class InviteManager {
-    protected final MultiHome plugin;
+    protected final MultiHomePlugin plugin;
 
     /**
      * @param plugin The plug-in.
      */
-    public InviteManager(MultiHome plugin) {
+    public InviteManager(MultiHomePlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -166,7 +167,7 @@ public abstract class InviteManager {
      * @param target Player to list invites for.
      * @return ArrayList<HomeInvite> containing list of invites.
      */
-    public final ArrayList<InviteEntry> listPlayerInvitesToMe(Player target) {
+    public final List<InviteEntry> listPlayerInvitesToMe(Player target) {
         return this.listPlayerInvitesToMe(target.getName());
     }
 
@@ -176,7 +177,7 @@ public abstract class InviteManager {
      * @param target Player to list invites for.
      * @return ArrayList<HomeInvite> containing list of invites.
      */
-    abstract public ArrayList<InviteEntry> listPlayerInvitesToMe(String target);
+    abstract public List<InviteEntry> listPlayerInvitesToMe(String target);
 
     /**
      * Returns a list of invites the owner has given to others.
@@ -184,7 +185,7 @@ public abstract class InviteManager {
      * @param owner Player to list invites for.
      * @return ArrayList<HomeInvite> containing list of invites.
      */
-    public final ArrayList<InviteEntry> listPlayerInvitesToOthers(Player owner) {
+    public final List<InviteEntry> listPlayerInvitesToOthers(Player owner) {
         return this.listPlayerInvitesToOthers(owner.getName());
     }
 
@@ -194,7 +195,7 @@ public abstract class InviteManager {
      * @param owner Player to list invites for.
      * @return ArrayList<HomeInvite> containing list of invites.
      */
-    abstract public ArrayList<InviteEntry> listPlayerInvitesToOthers(String owner);
+    abstract public List<InviteEntry> listPlayerInvitesToOthers(String owner);
 
     /**
      * Imports the list of invites passed.

@@ -1,72 +1,47 @@
 name: MultiHome
 version: ${project.version}
-main: net.madmanmarkau.multihome.MultiHome
-authors:
- - MadManMarkAu
- - Sleaker
- - HereInPlainSight
- - HmmmQuestionMark
-softdepend:
- - Vault
- - PermissionsEx
+main: net.madmanmarkau.multihome.MultiHomePlugin
+authors: [MadManMarkAu, Sleaker, HereInPlainSight, HmmmQuestionMark]
+softdepend: [Vault]
 license: WTFPL
-description: >
-             Multiple home locations.
+description: Multiple home locations.
 commands:
   home:
     description: Takes you back to your home location.
     usage: /<command> [[<user>:]location_name]
-  mhome:
-    description: Takes you back to your home location.
-    usage: /<command> [[<user>:]location_name]
+    aliases: [mhome]
   sethome:
     description: Sets your home location.
     usage: /<command> [[<user>:]location_name]
-  msethome:
-    description: Sets your home location.
-    usage: /<command> [[<user>:]location_name]
+    aliases: [msethome]
   deletehome:
     description: Deletes a named home location.
     usage: /<command> [<user>:]<location_name>
-  mdeletehome:
-    description: Deletes a named home location.
-    usage: /<command> [<user>:]<location_name>
+    aliases: [mdeletehome]
   listhomes:
     description: Lists all your home locations.
     usage: /<command> [<user>]
-  mlisthomes:
-    description: Lists all your home locations.
-    usage: /<command> [<user>]
+    aliases: [mlisthomes]
   invitehome:
     description: Invites another player to your home. Make your home location public.
     usage: /<command> {<user>|*} [<home>]
-  minvitehome:
-    description: Invites another player to your home. Make your home location public.
-    usage: /<command> {<user>|*} [<home>]
+    aliases: [minvitehome]
   invitehometimed:
     description: Invites another player to your home for a time. Make your home location public.
     usage: /<command> {<user>|*} <time> [<home>]
-  minvitehometimed:
-    description: Invites another player to your home for a time. Make your home location public.
-    usage: /<command> {<user>|*} <time> [<home>]
+    aliases: [minvitehometimed]
   uninvitehome:
     description: Uninvites another player to your home.
     usage: /<command> {<player>|*} [<home>]
-  muninvitehome:
-    description: Uninvites another player to your home.
-    usage: /<command> {<player>|*} [<home>]
+    aliases: [muninvitehome]
   listinvites:
     description: List homes you may visit.
     usage: /<command>
-  mlistinvites:
-    description: List homes you may visit.
-    usage: /<command>
+    aliases: [mlistinvites]
   listmyinvites:
     description: List which of your homes others may visit.
     usage: /<command>
-  mlistmyinvites:
-    description: List which of your homes others may visit.
-    usage: /<command>
+    aliases: [mlistmyinvites]
 
 permissions:
     multihome.*:

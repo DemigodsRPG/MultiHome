@@ -1,14 +1,21 @@
 package net.madmanmarkau.multihome.data;
 
-import net.madmanmarkau.multihome.Messaging;
-import net.madmanmarkau.multihome.MultiHome;
-import net.madmanmarkau.multihome.Util;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
+import net.madmanmarkau.multihome.MultiHomePlugin;
+import net.madmanmarkau.multihome.util.MessageUtil;
+import net.madmanmarkau.multihome.util.MiscUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages a database of player home locations.
@@ -18,29 +25,30 @@ import java.util.Map.Entry;
 
 public class HomeManagerFile extends HomeManager {
     private final File homesFile;
-    private HashMap<String, ArrayList<HomeEntry>> homeEntries = new HashMap<String, ArrayList<HomeEntry>>();
+    private ListMultimap<String, HomeEntry> homeEntries = Multimaps.newListMultimap(new ConcurrentHashMap<String, Collection<HomeEntry>>(), new Supplier<List<HomeEntry>>() {
+        @Override
+        public List<HomeEntry> get() {
+            return new ArrayList<>();
+        }
+    });
 
-    public HomeManagerFile(MultiHome plugin) {
+    public HomeManagerFile(MultiHomePlugin plugin) {
         super(plugin);
         this.homesFile = new File(plugin.getDataFolder(), "homes.txt");
-
         loadHomes();
     }
 
     @Override
     public void clearHomes() {
         this.homeEntries.clear();
-
         saveHomes();
     }
 
     @Override
-    public HomeEntry getHome(String player, String name) {
-        if (this.homeEntries.containsKey(player.toLowerCase())) {
-            ArrayList<HomeEntry> homes = this.homeEntries.get(player.toLowerCase());
-
-            for (HomeEntry thisLocation : homes) {
-                if (thisLocation.getHomeName().compareToIgnoreCase(name) == 0) {
+    public HomeEntry getHomeById(String playerId, String name) {
+        if (this.homeEntries.containsKey(playerId)) {
+            for (HomeEntry thisLocation : homeEntries.get(playerId)) {
+                if (thisLocation.getHomeName().equalsIgnoreCase(name)) {
                     return thisLocation;
                 }
             }
@@ -50,39 +58,52 @@ public class HomeManagerFile extends HomeManager {
     }
 
     @Override
-    public void addHome(String player, String name, Location location) {
-        ArrayList<HomeEntry> homes;
+    public HomeEntry getHomeByName(String playerName, String name) {
+        OfflinePlayer potentialPlayer = Bukkit.getOfflinePlayer(playerName);
+        if (potentialPlayer.isOnline()) {
+            return getHomeById(potentialPlayer.getUniqueId().toString(), name);
+        }
 
-        // Get the ArrayList of homes for this player
-        if (this.homeEntries.containsKey(player.toLowerCase())) {
-            homes = this.homeEntries.get(player.toLowerCase());
+        for (HomeEntry thisHome : homeEntries.values()) {
+            if (playerName.equals(thisHome.getOwnerName()) && thisHome.getHomeName().equals(name)) {
+                return thisHome;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void addHome(Player player, String name, Location location) {
+        List<HomeEntry> homes;
+
+        // Get the List of homes for this player
+        if (this.homeEntries.containsKey(player.getUniqueId().toString())) {
+            homes = this.homeEntries.get(player.getUniqueId().toString());
         } else {
-            homes = new ArrayList<HomeEntry>();
+            homes = new ArrayList<>();
         }
 
         boolean homeSet = false;
+
+        HomeEntry home = new HomeEntry(player.getUniqueId().toString(), player.getName(), name.toLowerCase(), location);
 
         for (int index = 0; index < homes.size(); index++) {
             HomeEntry thisHome = homes.get(index);
             if (thisHome.getHomeName().compareToIgnoreCase(name) == 0) {
                 // An existing home was found. Overwrite it.
-                thisHome.setOwnerName(player);
-                thisHome.setHomeName(name);
-                thisHome.setHomeLocation(location);
-                homes.set(index, thisHome);
+                homes.set(index, home);
                 homeSet = true;
             }
         }
 
         if (!homeSet) {
             // No existing location found. Create new entry.
-            HomeEntry home = new HomeEntry(player, name.toLowerCase(), location);
             homes.add(home);
         }
 
-        // Replace the ArrayList in the homes HashMap
-        this.homeEntries.remove(player.toLowerCase());
-        this.homeEntries.put(player.toLowerCase(), homes);
+        // Replace the List in the homes Map
+        this.homeEntries.replaceValues(player.getUniqueId().toString(), homes);
 
         // Save
         this.saveHomes();
@@ -91,8 +112,8 @@ public class HomeManagerFile extends HomeManager {
     @Override
     public void removeHome(String player, String name) {
         if (this.homeEntries.containsKey(player.toLowerCase())) {
-            ArrayList<HomeEntry> playerHomeList = this.homeEntries.get(player.toLowerCase());
-            ArrayList<HomeEntry> removeList = new ArrayList<HomeEntry>();
+            List<HomeEntry> playerHomeList = this.homeEntries.get(player.toLowerCase());
+            List<HomeEntry> removeList = new ArrayList<>();
 
             // Find all homes matching "name"
             for (HomeEntry thisHome : playerHomeList) {
@@ -105,11 +126,8 @@ public class HomeManagerFile extends HomeManager {
             // Remove all matching homes.
             playerHomeList.removeAll(removeList);
 
-            // Replace the ArrayList in the homes HashMap
-            this.homeEntries.remove(player.toLowerCase());
-            if (!playerHomeList.isEmpty()) {
-                this.homeEntries.put(player.toLowerCase(), playerHomeList);
-            }
+            // Replace the List in the homes HashMap
+            this.homeEntries.replaceValues(player, playerHomeList);
 
             // Save
             this.saveHomes();
@@ -131,17 +149,17 @@ public class HomeManagerFile extends HomeManager {
     }
 
     @Override
-    public ArrayList<HomeEntry> listUserHomes(String player) {
+    public List<HomeEntry> listUserHomes(String player) {
         if (this.homeEntries.containsKey(player.toLowerCase())) {
             return this.homeEntries.get(player.toLowerCase());
         } else {
-            return new ArrayList<HomeEntry>();
+            return new ArrayList<>();
         }
     }
 
     @Override
-    public void importHomes(ArrayList<HomeEntry> homes, boolean overwrite) {
-        ArrayList<HomeEntry> playerHomes;
+    public void importHomes(List<HomeEntry> homes, boolean overwrite) {
+        List<HomeEntry> playerHomes;
 
         for (HomeEntry thisEntry : homes) {
             // Get the ArrayList of homes for this player
@@ -155,13 +173,10 @@ public class HomeManagerFile extends HomeManager {
 
             for (int index = 0; index < playerHomes.size(); index++) {
                 HomeEntry thisHome = playerHomes.get(index);
-                if (thisHome.getHomeName().compareToIgnoreCase(thisEntry.getHomeName()) == 0) {
+                if (thisHome.getHomeName().equals(thisEntry.getHomeName())) {
                     // An existing home was found.
                     if (overwrite) {
-                        thisHome.setOwnerName(thisEntry.getOwnerName());
-                        thisHome.setHomeName(thisEntry.getHomeName());
-                        thisHome.setHomeLocation(thisEntry.getHomeLocation(plugin.getServer()));
-                        playerHomes.set(index, thisHome);
+                        playerHomes.set(index, thisEntry);
                     }
 
                     homeFound = true;
@@ -170,13 +185,12 @@ public class HomeManagerFile extends HomeManager {
 
             if (!homeFound) {
                 // No existing location found. Create new entry.
-                HomeEntry newHome = new HomeEntry(thisEntry.getOwnerName(), thisEntry.getHomeName(), thisEntry.getHomeLocation(plugin.getServer()));
+                HomeEntry newHome = new HomeEntry(thisEntry.getOwnerId(), thisEntry.getOwnerName(), thisEntry.getHomeName(), thisEntry.getHomeLocation(plugin.getServer()));
                 playerHomes.add(newHome);
             }
 
-            // Replace the ArrayList in the homes HashMap
-            this.homeEntries.remove(thisEntry.getOwnerName().toLowerCase());
-            this.homeEntries.put(thisEntry.getOwnerName().toLowerCase(), playerHomes);
+            // Replace the List in the homes HashMap
+            this.homeEntries.replaceValues(thisEntry.getOwnerId(), playerHomes);
         }
 
         // Save
@@ -192,20 +206,18 @@ public class HomeManagerFile extends HomeManager {
             FileWriter fstream = new FileWriter(this.homesFile);
             BufferedWriter writer = new BufferedWriter(fstream);
 
-            writer.write("# Stores user home locations." + Util.newLine());
-            writer.write("# <username>;<x>;<y>;<z>;<pitch>;<yaw>;<world>[;<name>]" + Util.newLine());
-            writer.write(Util.newLine());
+            writer.write("# Stores user home locations." + MiscUtil.newLine());
+            writer.write("# <uuid>;<username>;<x>;<y>;<z>;<pitch>;<yaw>;<world>[;<name>]" + MiscUtil.newLine());
+            writer.write(MiscUtil.newLine());
 
-            for (Entry<String, ArrayList<HomeEntry>> entry : this.homeEntries.entrySet()) {
-                for (HomeEntry thisHome : entry.getValue()) {
-                    writer.write(thisHome.getOwnerName() + ";" + thisHome.getX() + ";" + thisHome.getY() + ";" + thisHome.getZ() + ";"
-                            + thisHome.getPitch() + ";" + thisHome.getYaw() + ";"
-                            + thisHome.getWorld() + ";" + thisHome.getHomeName() + Util.newLine());
-                }
+            for (HomeEntry thisHome : this.homeEntries.values()) {
+                writer.write(thisHome.getOwnerId() + ";" + thisHome.getOwnerName() + ";" + thisHome.getX() + ";" + thisHome.getY() + ";" + thisHome.getZ() + ";"
+                        + thisHome.getPitch() + ";" + thisHome.getYaw() + ";"
+                        + thisHome.getWorld() + ";" + thisHome.getHomeName() + MiscUtil.newLine());
             }
             writer.close();
         } catch (Exception e) {
-            Messaging.logSevere("Could not write the homes file.", this.plugin);
+            MessageUtil.logSevere("Could not write the homes file.");
         }
     }
 
@@ -229,14 +241,14 @@ public class HomeManagerFile extends HomeManager {
                         thisHome = parseHomeLine(line);
 
                         if (thisHome != null) {
-                            ArrayList<HomeEntry> homeList;
+                            List<HomeEntry> homeList;
 
-                            // Find HashMap entry for player
-                            if (!this.homeEntries.containsKey(thisHome.getOwnerName().toLowerCase())) {
-                                homeList = new ArrayList<HomeEntry>();
+                            // Find Map entry for player
+                            if (!this.homeEntries.containsKey(thisHome.getOwnerId())) {
+                                homeList = new ArrayList<>();
                             } else {
                                 // Player not exist. Create dummy entry.
-                                homeList = this.homeEntries.get(thisHome.getOwnerName().toLowerCase());
+                                homeList = this.homeEntries.get(thisHome.getOwnerId());
                             }
 
                             // Don't save if this is a duplicate entry.
@@ -251,7 +263,7 @@ public class HomeManagerFile extends HomeManager {
                                 homeList.add(thisHome);
                             }
 
-                            this.homeEntries.put(thisHome.getOwnerName().toLowerCase(), homeList);
+                            this.homeEntries.replaceValues(thisHome.getOwnerId(), homeList);
                         }
                     }
 
@@ -260,7 +272,7 @@ public class HomeManagerFile extends HomeManager {
 
                 reader.close();
             } catch (Exception e) {
-                Messaging.logSevere("Could not read the homes file.", this.plugin);
+                MessageUtil.logSevere("Could not read the homes file.");
                 return;
             }
         }
@@ -275,39 +287,40 @@ public class HomeManagerFile extends HomeManager {
         float pitch = 0, yaw = 0;
         String world = "";
         String name = "";
-        String player = "";
+        String playerId = "";
+        String playerName = "";
 
         try {
-            if (values.length == 7) {
-                player = values[0];
-                X = Double.parseDouble(values[1]);
-                Y = Double.parseDouble(values[2]);
-                Z = Double.parseDouble(values[3]);
-                pitch = Float.parseFloat(values[4]);
-                yaw = Float.parseFloat(values[5]);
+            if (values.length == 8) {
+                playerId = values[0];
+                playerName = values[1];
+                X = Double.parseDouble(values[2]);
+                Y = Double.parseDouble(values[3]);
+                Z = Double.parseDouble(values[4]);
+                pitch = Float.parseFloat(values[5]);
+                yaw = Float.parseFloat(values[6]);
 
-                world = values[6];
+                world = values[7];
                 name = "";
-            } else if (values.length == 8) {
-                player = values[0];
-                X = Double.parseDouble(values[1]);
-                Y = Double.parseDouble(values[2]);
-                Z = Double.parseDouble(values[3]);
-                pitch = Float.parseFloat(values[4]);
-                yaw = Float.parseFloat(values[5]);
+            } else if (values.length == 9) {
+                playerId = values[0];
+                playerName = values[1];
+                X = Double.parseDouble(values[2]);
+                Y = Double.parseDouble(values[3]);
+                Z = Double.parseDouble(values[4]);
+                pitch = Float.parseFloat(values[5]);
+                yaw = Float.parseFloat(values[6]);
 
-                world = values[6];
-                name = values[7];
+                world = values[7];
+                name = values[8];
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // This entry failed. Ignore and continue.
-            if (line != null) {
-                Messaging.logWarning("Failed to load home location! Line: " + line, this.plugin);
-            }
+            MessageUtil.logWarning("Failed to load home location! Line: " + line);
         }
 
         if (values.length == 7 || values.length == 8) {
-            return new HomeEntry(player, name, world, X, Y, Z, pitch, yaw);
+            return new HomeEntry(playerId, playerName, name, world, X, Y, Z, pitch, yaw);
         }
 
         return null;

@@ -78,6 +78,11 @@
         <!-- CensoredLib -->
         <dependency>
             <groupId>com.censoredsoftware.library</groupId>
+            <artifactId>command</artifactId>
+            <version>${censoredlib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.censoredsoftware.library</groupId>
             <artifactId>util</artifactId>
             <version>${censoredlib.version}</version>
         </dependency>

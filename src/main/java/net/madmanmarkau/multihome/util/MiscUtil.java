@@ -1,4 +1,4 @@
-package net.madmanmarkau.multihome;
+package net.madmanmarkau.multihome.util;
 
 import net.madmanmarkau.multihome.data.HomeEntry;
 import net.madmanmarkau.multihome.data.InviteEntry;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Util {
+public class MiscUtil {
     public static String newLine() {
         return System.getProperty("line.separator");
     }
@@ -54,9 +54,7 @@ public class Util {
      */
     public static Player getPlayer(String username, JavaPlugin plugin) {
         List<Player> players = plugin.getServer().matchPlayer(username);
-
         if (players.size() == 1) return players.get(0);
-
         return null;
     }
 
@@ -108,7 +106,7 @@ public class Util {
         return new Date(now.getTime() + seconds * 1000);
     }
 
-    public static String compileHomeList(ArrayList<HomeEntry> homes) {
+    public static String compileHomeList(List<HomeEntry> homes) {
         String userResponse = "";
         for (HomeEntry thisLocation : homes) {
             if (thisLocation.getHomeName().length() == 0) {
